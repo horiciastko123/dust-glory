@@ -737,6 +737,74 @@
                 width: 100%;
             }
         }
+
+        @media (max-width: 768px) {
+            .footer-info {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                align-items: center;
+                width: 100%;
+                margin: 0 auto;
+                padding: 0 15px;
+            }
+
+            .footer-info div {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 0 auto;
+            }
+
+            .footer-info a, 
+            .footer-info a.map-link {
+                justify-content: center;
+                width: 100%;
+                display: flex;
+                align-items: center;
+            }
+
+            .legal-info {
+                margin: 0 auto;
+                width: 100%;
+                padding: 10px 15px 0;
+            }
+
+            .buy-button {
+                width: 100%;
+                max-width: 300px;
+                margin: 0 auto;
+                display: block;
+                padding: 15px;
+                font-size: 1.1rem;
+            }
+
+            .buy-button-wrapper {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+            footer {
+                width: 100%;
+                left: 0;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .footer-info {
+                padding: 0 10px;
+                font-size: 0.9rem;
+            }
+
+            .buy-button {
+                max-width: 100%;
+                padding: 12px;
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
