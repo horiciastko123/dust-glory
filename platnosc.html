@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Płatność - Dust and Glory</title>
+    <link rel="icon" type="image/" href="image/Logo2_biale.png">
+    <link rel="stylesheet" href="https://geowidget.easypack24.net/css/easypack.css"/>
+    <script src="https://geowidget.easypack24.net/js/sdk-for-javascript.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(to right, #e084df, #39a0d4);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .payment-container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            background: white;
+            color: #333;
+            text-decoration: none;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-button i {
+            margin-right: 8px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            background: #e084df;
+            color: white;
+        }
+
+        .product-summary {
+            display: flex;
+            gap: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .product-image {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .product-details h2 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            color: #e084df;
+            font-weight: bold;
+        }
+
+        .payment-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            border-color: #e084df;
+            outline: none;
+        }
+
+        .submit-button {
+            background: linear-gradient(to right, #e084df, #39a0d4);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .submit-button:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            .product-summary {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .country-prefix {
+            display: flex;
+            gap: 10px;
+        }
+
+        .country-prefix select {
+            width: 100px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .phone-input {
+            flex: 1;
+        }
+
+        .address-details {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .postal-country {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .optional-label {
+            color: #666;
+            font-size: 0.8rem;
+            font-weight: normal;
+        }
+
+        .validation-error {
+            color: #ff4444;
+            font-size: 0.9rem;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-group.error input {
+            border-color: #ff4444;
+        }
+
+        .form-group.error .validation-error {
+            display: block;
+        }
+
+        .country-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .country-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .country-flag {
+            width: 24px;
+            height: 16px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        .country-name {
+            flex: 1;
+        }
+
+        .phone-prefix {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        select {
+            appearance: none;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        select:focus {
+            border-color: #e084df;
+            outline: none;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            pointer-events: none;
+            font-size: 0.8rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .form-row, .address-details, .postal-country {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .payment-methods {
+            margin: 20px 0;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        .payment-methods h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .payment-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .payment-option {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .payment-option:hover {
+            border-color: #e084df;
+            transform: translateY(-2px);
+        }
+
+        .payment-option.selected {
+            border-color: #e084df;
+            background: rgba(224, 132, 223, 0.1);
+        }
+
+        .payment-option img {
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .payment-option span {
+            display: block;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .order-confirmation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+        }
+
+        .order-confirmation i {
+            font-size: 50px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .order-confirmation h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .order-confirmation p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .order-number {
+            font-size: 1.2rem;
+            color: #e084df;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .confirmation-button {
+            background: linear-gradient(to right, #e084df, #39a0d4);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .confirmation-button:hover {
+            transform: scale(1.05);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translate(-50%, -60%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        .delivery-methods {
+            margin: 20px 0;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        .delivery-methods h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .delivery-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .delivery-option {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .delivery-option:hover {
+            border-color: #e084df;
+            transform: translateY(-2px);
+        }
+
+        .delivery-option.selected {
+            border-color: #e084df;
+            background: rgba(224, 132, 223, 0.1);
+        }
+
+        .delivery-option img {
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .delivery-option span {
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .delivery-option .price {
+            color: #e084df;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .delivery-details {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .delivery-details.active {
+            display: block;
+        }
+
+        #inpostMap {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .total-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+
+        .total-price {
+            color: #e084df;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .easypack-widget {
+            z-index: 1000;
+        }
+        
+        .map-widget {
+            height: 400px;
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        #selected-locker-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: none;
+        }
+
+        #selected-locker-info.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .delivery-address-form {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .map-widget {
+            height: 400px;
+            width: 100%;
+            margin: 15px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #selected-locker-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #e084df;
+            display: none;
+        }
+
+        #selected-locker-info.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .delivery-details h4 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .delivery-error {
+            color: #ff4444;
+            font-size: 0.9rem;
+            padding: 10px;
+            margin-top: 10px;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: 4px;
+            border-left: 3px solid #ff4444;
+            display: none;
+        }
+
+        .delivery-error.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #selected-locker-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #e084df;
+            display: none;
+        }
+
+        #selected-locker-info.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .locker-details {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .change-locker-button {
+            background: linear-gradient(to right, #e084df, #39a0d4);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .change-locker-button:hover {
+            transform: scale(1.05);
+        }
+
+        #inpost-map.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .validation-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1001;
+            max-width: 400px;
+            width: 90%;
+            display: none;
+        }
+
+        .validation-popup h3 {
+            color: #ff4444;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .validation-popup ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .validation-popup li {
+            padding: 8px 0;
+            color: #666;
+            border-bottom: 1px solid #eee;
+        }
+
+        .validation-popup li:last-child {
+            border-bottom: none;
+        }
+
+        .validation-popup button {
+            background: linear-gradient(to right, #e084df, #39a0d4);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        .validation-popup button:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 480px) {
+            .payment-container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .product-summary {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .product-image {
+                width: 120px;
+                height: 120px;
+                margin: 0 auto;
+            }
+
+            .product-details h2 {
+                font-size: 1.2rem;
+            }
+
+            .product-price {
+                font-size: 1.3rem;
+            }
+
+            .form-row, 
+            .address-details, 
+            .postal-country {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .payment-options,
+            .delivery-options {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .payment-option,
+            .delivery-option {
+                padding: 10px;
+            }
+
+            .payment-option img,
+            .delivery-option img {
+                height: 30px;
+            }
+
+            .submit-button {
+                padding: 12px 30px;
+                font-size: 1rem;
+                width: 100%;
+            }
+
+            .back-button {
+                position: static;
+                margin: 10px;
+                display: inline-flex;
+            }
+
+            #inpost-map {
+                height: 300px;
+            }
+
+            .delivery-details {
+                padding: 10px;
+            }
+
+            .validation-popup {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .payment-container {
+                padding: 10px;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+
+            .product-details h2 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="javascript:history.back()" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Powrót
+    </a>
+
+    <div class="payment-container">
+        <div class="product-summary">
+            <img src="" alt="Product Image" class="product-image" id="productImage">
+            <div class="product-details">
+                <h2 id="productName">Nazwa produktu</h2>
+                <p class="product-price" id="productPrice">0.00 zł</p>
+            </div>
+        </div>
+
+        <form class="payment-form" onsubmit="handleSubmit(event)" novalidate>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstname" class="required-field">Imię</label>
+                    <input type="text" id="firstname" required pattern="[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]{2,50}">
+                    <span class="validation-error">Wprowadź poprawne imię (min. 2 znaki)</span>
+                </div>
+                <div class="form-group">
+                    <label for="lastname" class="required-field">Nazwisko</label>
+                    <input type="text" id="lastname" required pattern="[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż\s-]{2,50}">
+                    <span class="validation-error">Wprowadź poprawne nazwisko (min. 2 znaki)</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="required-field">Email</label>
+                <input type="email" id="email" required 
+                       pattern="[a-z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|onet\.pl|wp\.pl|o2\.pl)$">
+                <span class="validation-error">Wprowadź poprawny adres email (gmail.com, onet.pl, wp.pl, etc.)</span>
+            </div>
+
+            <div class="form-group">
+                <label for="phone" class="required-field">Telefon</label>
+                <div class="country-prefix">
+                    <div class="select-wrapper">
+                        <select id="phonePrefix" required>
+                        </select>
+                    </div>
+                    <input type="tel" id="phone" class="phone-input" required>
+                </div>
+                <span class="validation-error">Wprowadź poprawny numer telefonu</span>
+            </div>
+
+            <div class="form-group">
+                <label for="country" class="required-field">Kraj</label>
+                <div class="select-wrapper">
+                    <select id="country" required>
+                        <option value="">Wybierz kraj</option>
+                    </select>
+                </div>
+                <span class="validation-error">Wybierz kraj</span>
+            </div>
+
+            <div class="postal-country">
+                <div class="form-group">
+                    <label for="postalCode" class="required-field">Kod pocztowy</label>
+                    <input type="text" id="postalCode" required 
+                           pattern="[0-9]{2}-[0-9]{3}" placeholder="00-000">
+                    <span class="validation-error">Format: 00-000</span>
+                </div>
+                <div class="form-group">
+                    <label for="city" class="required-field">Miejscowość</label>
+                    <input type="text" id="city" required>
+                </div>
+            </div>
+
+            <div class="address-details">
+                <div class="form-group">
+                    <label for="street" class="required-field">Ulica</label>
+                    <input type="text" id="street" required>
+                </div>
+                <div class="form-group">
+                    <label for="houseNumber" class="required-field">Nr domu</label>
+                    <input type="text" id="houseNumber" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="apartmentNumber">Nr mieszkania <span class="optional-label">(opcjonalnie)</span></label>
+                <input type="text" id="apartmentNumber">
+            </div>
+
+            <div class="delivery-methods">
+                <h3>Wybierz sposób dostawy</h3>
+                <div class="delivery-options">
+                    <div class="delivery-option" data-method="inpost">
+                        <img src="image/inpost-logo.jpg" alt="InPost">
+                        <span>InPost Paczkomat</span>
+                        <span class="price">14,99 zł</span>
+                    </div>
+                    <div class="delivery-option" data-method="dpd">
+                        <img src="image/dpd-logo.jpg" alt="DPD">
+                        <span>Kurier DPD</span>
+                        <span class="price">19,99 zł</span>
+                    </div>
+                    <div class="delivery-option" data-method="dhl">
+                        <img src="image/dhl-logo.jpg" alt="DHL">
+                        <span>Kurier DHL</span>
+                        <span class="price">18,99 zł</span>
+                    </div>
+                    <div class="delivery-option" data-method="ups">
+                        <img src="image/ups-logo.jpg" alt="UPS">
+                        <span>Kurier UPS</span>
+                        <span class="price">20,99 zł</span>
+                    </div>
+                </div>
+
+                <div id="inpostDetails" class="delivery-details">
+                    <h4>Wybierz Paczkomat</h4>
+                    <div id="inpost-map" class="map-widget"></div>
+                    <div id="selected-locker-info">
+                        <strong>Wybrany paczkomat:</strong>
+                        <div id="locker-details" class="locker-details"></div>
+                        <button type="button" class="change-locker-button" onclick="changeLocker()">
+                            Zmień paczkomat
+                        </button>
+                    </div>
+                    <div class="delivery-error" id="inpost-error">Wybierz paczkomat</div>
+                    <input type="hidden" id="selectedLocker" name="selectedLocker">
+                </div>
+
+                <div id="courierDetails" class="delivery-details">
+                    <h4>Adres dostawy</h4>
+                    <div class="delivery-address-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="delivery-street" class="required-field">Ulica</label>
+                                <input type="text" id="delivery-street" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="delivery-house" class="required-field">Nr domu</label>
+                                <input type="text" id="delivery-house" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="delivery-postal" class="required-field">Kod pocztowy</label>
+                                <input type="text" id="delivery-postal" required pattern="[0-9]{2}-[0-9]{3}" placeholder="00-000">
+                            </div>
+                            <div class="form-group">
+                                <label for="delivery-city" class="required-field">Miejscowość</label>
+                                <input type="text" id="delivery-city" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="delivery-apartment">Nr mieszkania <span class="optional-label">(opcjonalnie)</span></label>
+                            <input type="text" id="delivery-apartment">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-methods">
+                <h3>Wybierz metodę płatności</h3>
+                <div class="payment-options">
+                    <div class="payment-option" data-method="blik">
+                        <img src="image/blik-logo.jpg" alt="BLIK">
+                        <span>BLIK</span>
+                    </div>
+                    <div class="payment-option" data-method="przelew">
+                        <img src="image/przelewy24-logo.jpg" alt="Przelew">
+                        <span>Przelew bankowy</span>
+                    </div>
+                    <div class="payment-option" data-method="card">
+                        <img src="image/karta-logo.jpg" alt="Karta">
+                        <span>Karta płatnicza</span>
+                    </div>
+                </div>
+                <input type="hidden" id="paymentMethod" required>
+                <span class="validation-error">Wybierz metodę płatności</span>
+            </div>
+
+            <button type="submit" class="submit-button">Zamów i zapłać</button>
+        </form>
+    </div>
+
+    <div class="overlay"></div>
+    <div class="order-confirmation">
+        <i class="fas fa-check-circle"></i>
+        <h2>Dziękujemy za złożenie zamówienia!</h2>
+        <p>Twoje zamówienie zostało przyjęte do realizacji.</p>
+        <div class="order-number">Numer zamówienia: <span id="orderNumber"></span></div>
+        <p>Potwierdzenie zamówienia zostało wysłane na adres:<br>
+        <strong><span id="maskedEmail"></span></strong></p>
+        <p>Dziękujemy za zaufanie!</p>
+        <button class="confirmation-button" onclick="window.location.href='index.html'">Wróć do sklepu</button>
+    </div>
+
+    <div class="validation-popup" id="validationPopup">
+        <h3>Proszę uzupełnić wymagane pola:</h3>
+        <ul id="validationList"></ul>
+        <button onclick="closeValidationPopup()">Rozumiem</button>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            
+            const product = JSON.parse(localStorage.getItem('selectedProduct'));
+            
+            if (product) {
+                document.getElementById('productImage').src = product.image;
+                document.getElementById('productName').textContent = product.name;
+                document.getElementById('productPrice').textContent = product.price;
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        const countryData = [
+            { code: 'PL', name: 'Polska', flag: '🇵🇱', prefix: '+48', postalFormat: '[0-9]{2}-[0-9]{3}', postalPlaceholder: '00-000' },
+            { code: 'DE', name: 'Niemcy', flag: '🇩🇪', prefix: '+49', postalFormat: '[0-9]{5}', postalPlaceholder: '12345' },
+            { code: 'GB', name: 'Wielka Brytania', flag: '🇬🇧', prefix: '+44', postalFormat: '[A-Z]{1,2}[0-9][A-Z0-9]? [0-9][A-Z]{2}', postalPlaceholder: 'SW1A 1AA' },
+            { code: 'US', name: 'Stany Zjednoczone', flag: '🇺🇸', prefix: '+1', postalFormat: '[0-9]{5}(-[0-9]{4})?', postalPlaceholder: '12345' },
+            { code: 'FR', name: 'Francja', flag: '🇫🇷', prefix: '+33', postalFormat: '[0-9]{5}', postalPlaceholder: '75001' },
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const countrySelect = document.getElementById('country');
+            const phonePrefixSelect = document.getElementById('phonePrefix');
+
+            countryData.forEach(country => {
+                countrySelect.innerHTML += `
+                    <option value="${country.code}">
+                        <div class="country-option">
+                            ${country.flag} ${country.name}
+                        </div>
+                    </option>
+                `;
+
+                phonePrefixSelect.innerHTML += `
+                    <option value="${country.prefix}" data-country="${country.code}">
+                        ${country.flag} ${country.prefix}
+                    </option>
+                `;
+            });
+
+            const form = document.querySelector('.payment-form');
+            const inputs = form.querySelectorAll('input, select');
+
+            inputs.forEach(input => {
+                input.addEventListener('input', validateInput);
+                input.addEventListener('blur', validateInput);
+            });
+        });
+
+        function validateInput(event) {
+            const input = event.target;
+            const formGroup = input.closest('.form-group');
+            let isValid = true;
+            let errorMessage = '';
+
+            switch(input.id) {
+                case 'firstname':
+                case 'lastname':
+                    isValid = /^[A-Za-zĄąĆćĘęŁłŃńÓóŚśŹźŻż\s]{2,50}$/.test(input.value);
+                    errorMessage = 'Minimum 2 znaki, tylko litery';
+                    break;
+                    
+                case 'email':
+                    isValid = /[a-z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|onet\.pl|wp\.pl|o2\.pl)$/.test(input.value);
+                    errorMessage = 'Nieprawidłowy format adresu email';
+                    break;
+                    
+                case 'phone':
+                    const phoneFormat = getPhoneFormatForCountry(document.getElementById('country').value);
+                    isValid = phoneFormat.test(input.value);
+                    errorMessage = 'Nieprawidłowy numer telefonu';
+                    break;
+                    
+                case 'postalCode':
+                    const country = countryData.find(c => c.code === document.getElementById('country').value);
+                    if (country) {
+                        const regex = new RegExp(country.postalFormat);
+                        isValid = regex.test(input.value);
+                        errorMessage = `Format: ${country.postalPlaceholder}`;
+                    }
+                    break;
+            }
+
+            formGroup.classList.toggle('error', !isValid && input.value);
+            formGroup.classList.toggle('success', isValid && input.value);
+            
+            const errorElement = formGroup.querySelector('.validation-error');
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+            }
+        }
+
+        function getPhoneFormatForCountry(countryCode) {
+            const formats = {
+                'PL': /^[0-9]{9}$/,
+                'DE': /^[0-9]{10,11}$/,
+                'GB': /^[0-9]{10}$/,
+                'US': /^[0-9]{10}$/,
+                'FR': /^[0-9]{9}$/
+            };
+            return formats[countryCode] || /^[0-9]{9,15}$/;
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            let isValid = true;
+            let errors = [];
+
+            const requiredFields = {
+                'firstname': 'Wprowadź imię',
+                'lastname': 'Wprowadź nazwisko',
+                'email': 'Wprowadź adres email',
+                'phone': 'Wprowadź numer telefonu',
+                'street': 'Wprowadź ulicę',
+                'houseNumber': 'Wprowadź numer domu',
+                'postalCode': 'Wprowadź kod pocztowy',
+                'city': 'Wprowadź miejscowość'
+            };
+
+            Object.entries(requiredFields).forEach(([id, message]) => {
+                const field = document.getElementById(id);
+                if (!field.value.trim()) {
+                    isValid = false;
+                    errors.push(message);
+                }
+            });
+
+            const selectedDelivery = document.querySelector('.delivery-option.selected');
+            if (!selectedDelivery) {
+                isValid = false;
+                errors.push('Wybierz sposób dostawy');
+            } else {
+                if (selectedDelivery.dataset.method === 'inpost') {
+                    if (!document.getElementById('selectedLocker').value) {
+                        isValid = false;
+                        errors.push('Wybierz paczkomat');
+                    }
+                } else {
+                    const courierFields = {
+                        'delivery-street': 'Wprowadź ulicę dostawy',
+                        'delivery-house': 'Wprowadź numer domu dostawy',
+                        'delivery-postal': 'Wprowadź kod pocztowy dostawy',
+                        'delivery-city': 'Wprowadź miejscowość dostawy'
+                    };
+
+                    Object.entries(courierFields).forEach(([id, message]) => {
+                        const field = document.getElementById(id);
+                        if (!field.value.trim()) {
+                            isValid = false;
+                            errors.push(message);
+                        }
+                    });
+                }
+            }
+
+            if (!document.querySelector('.payment-option.selected')) {
+                isValid = false;
+                errors.push('Wybierz metodę płatności');
+            }
+
+            if (!isValid) {
+                alert('Proszę uzupełnić wszystkie wymagane pola:\n\n' + errors.join('\n'));
+                return;
+            }
+
+            const orderNumber = generateOrderNumber();
+            const email = document.getElementById('email').value;
+            const maskedEmail = maskEmail(email);
+
+            document.getElementById('orderNumber').textContent = orderNumber;
+            document.getElementById('maskedEmail').textContent = maskedEmail;
+
+            document.querySelector('.overlay').style.display = 'block';
+            document.querySelector('.order-confirmation').style.display = 'block';
+
+            setTimeout(() => {
+                localStorage.removeItem('selectedProduct');
+            }, 5000);
+        }
+
+        function generateOrderNumber() {
+            const date = new Date();
+            const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `DG${date.getFullYear().toString().slice(-2)}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}-${randomNum}`;
+        }
+
+        function maskEmail(email) {
+            const [username, domain] = email.split('@');
+            const maskedUsername = username.charAt(0) + 
+                '*'.repeat(username.length - 2) + 
+                username.charAt(username.length - 1);
+            return `${maskedUsername}@${domain}`;
+        }
+
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('input', function() {
+                const formGroup = this.closest('.form-group');
+                if (formGroup) {
+                    if (this.value.trim()) {
+                        formGroup.classList.remove('error');
+                        const errorElement = formGroup.querySelector('.validation-error');
+                        if (errorElement) {
+                            errorElement.style.display = 'none';
+                        }
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                document.getElementById('paymentMethod').value = option.dataset.method;
+                validatePaymentMethod();
+            });
+        });
+
+        function validatePaymentMethod() {
+            const paymentMethod = document.getElementById('paymentMethod');
+            const paymentGroup = paymentMethod.closest('.payment-methods');
+            const isValid = paymentMethod.value !== '';
+            
+            paymentGroup.classList.toggle('error', !isValid);
+            return isValid;
+        }
+
+        document.querySelectorAll('.delivery-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.delivery-option').forEach(opt => 
+                    opt.classList.remove('selected'));
+                option.classList.add('selected');
+
+                document.querySelectorAll('.delivery-details').forEach(detail => 
+                    detail.classList.remove('active'));
+
+                const method = option.dataset.method;
+                if (method === 'inpost') {
+                    document.getElementById('inpostDetails').classList.add('active');
+                    document.getElementById('courierDetails').classList.remove('active');
+                    initInpostMap();
+                } else {
+                    document.getElementById('courierDetails').classList.add('active');
+                    document.getElementById('inpostDetails').classList.remove('active');
+                }
+
+                updateTotalPrice();
+            });
+        });
+
+        function initInpostMap() {
+            if (!window.easyPackAsyncInit) {
+                window.easyPackAsyncInit = function() {
+                    easyPack.init({
+                        defaultLocale: 'pl',
+                        points: {
+                            types: ['parcel_locker']
+                        },
+                        map: {
+                            initialTypes: ['parcel_locker'],
+                            useGeolocation: true
+                        }
+                    });
+
+                    const map = easyPack.mapWidget('inpost-map', function(point) {
+                        document.getElementById('selectedLocker').value = point.name;
+                        document.getElementById('locker-details').innerHTML = `
+                            ${point.name}<br>
+                            ${point.address.line1}<br>
+                            ${point.address.line2}
+                        `;
+                        document.getElementById('selected-locker-info').classList.add('active');
+                    });
+                };
+            }
+        }
+
+        function updateTotalPrice() {
+            const productPrice = parseFloat(document.getElementById('productPrice')
+                .textContent.replace(' zł', '').replace(',', '.'));
+            const selectedDelivery = document.querySelector('.delivery-option.selected');
+            const deliveryPrice = selectedDelivery ? 
+                parseFloat(selectedDelivery.querySelector('.price').textContent
+                    .replace(' zł', '').replace(',', '.')) : 0;
+
+            const total = productPrice + deliveryPrice;
+            document.querySelector('.total-price').textContent = 
+                total.toFixed(2).replace('.', ',') + ' zł';
+        }
+
+        let inpostMap = null;
+        let selectedPoint = null;
+
+        function initInpostMap() {
+            if (window.easyPack && !inpostMap) {
+                easyPack.init({
+                    defaultLocale: 'pl',
+                    points: {
+                        types: ['parcel_locker']
+                    },
+                    map: {
+                        initialTypes: ['parcel_locker'],
+                        useGeolocation: true
+                    }
+                });
+
+                inpostMap = easyPack.mapWidget('inpost-map', function(point) {
+                    selectLocker(point);
+                });
+            }
+        }
+
+        function selectLocker(point) {
+            selectedPoint = point;
+            document.getElementById('selectedLocker').value = point.name;
+            document.getElementById('locker-details').innerHTML = `
+                <strong>${point.name}</strong><br>
+                ${point.address.line1}<br>
+                ${point.address.line2}
+            `;
+            document.getElementById('selected-locker-info').classList.add('active');
+            document.getElementById('inpost-error').classList.remove('active');
+            document.getElementById('inpost-map').classList.add('disabled');
+        }
+
+        function changeLocker() {
+            document.getElementById('inpost-map').classList.remove('disabled');
+            document.getElementById('selected-locker-info').classList.remove('active');
+            selectedPoint = null;
+            document.getElementById('selectedLocker').value = '';
+        }
+
+        document.querySelectorAll('.delivery-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const errorMessage = document.querySelector('.delivery-methods .validation-error');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+
+                document.querySelectorAll('.delivery-option').forEach(opt => 
+                    opt.classList.remove('selected'));
+                option.classList.add('selected');
+
+                document.querySelectorAll('.delivery-details').forEach(detail => 
+                    detail.classList.remove('active'));
+
+                document.querySelectorAll('.delivery-error').forEach(error => 
+                    error.classList.remove('active'));
+
+                const method = option.dataset.method;
+                if (method === 'inpost') {
+                    document.getElementById('inpostDetails').classList.add('active');
+                    document.getElementById('courierDetails').classList.remove('active');
+                    if (!inpostMap) {
+                        setTimeout(initInpostMap, 100);
+                    }
+                } else {
+                    document.getElementById('courierDetails').classList.add('active');
+                    document.getElementById('inpostDetails').classList.remove('active');
+                }
+
+                updateTotalPrice();
+            });
+        });
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            let isValid = true;
+            const requiredFields = {
+                'firstname': 'Pole wymagane',
+                'lastname': 'Pole wymagane',
+                'email': 'Wprowadź poprawny adres email',
+                'phone': 'Wprowadź numer telefonu',
+                'street': 'Wprowadź ulicę',
+                'houseNumber': 'Wprowadź numer domu',
+                'postalCode': 'Wprowadź kod pocztowy',
+                'city': 'Wprowadź miejscowość'
+            };
+
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error');
+            });
+
+            Object.entries(requiredFields).forEach(([id, message]) => {
+                const field = document.getElementById(id);
+                const formGroup = field.closest('.form-group');
+                
+                if (!field.value.trim()) {
+                    isValid = false;
+                    formGroup.classList.add('error');
+                    const errorSpan = formGroup.querySelector('.validation-error');
+                    if (errorSpan) {
+                        errorSpan.textContent = message;
+                    }
+                }
+            });
+
+            const selectedDelivery = document.querySelector('.delivery-option.selected');
+            if (!selectedDelivery) {
+                isValid = false;
+                document.querySelector('.delivery-methods').insertAdjacentHTML(
+                    'beforeend',
+                    '<span class="validation-error" style="display: block; margin-top: 10px;">Wybierz sposób dostawy</span>'
+                );
+            } else if (selectedDelivery.dataset.method !== 'inpost') {
+                const courierFields = {
+                    'delivery-street': 'Wprowadź ulicę dostawy',
+                    'delivery-house': 'Wprowadź numer domu dostawy',
+                    'delivery-postal': 'Wprowadź kod pocztowy dostawy',
+                    'delivery-city': 'Wprowadź miejscowość dostawy'
+                };
+
+                Object.entries(courierFields).forEach(([id, message]) => {
+                    const field = document.getElementById(id);
+                    const formGroup = field.closest('.form-group');
+                    
+                    if (!field.value.trim()) {
+                        isValid = false;
+                        formGroup.classList.add('error');
+                        const errorSpan = formGroup.querySelector('.validation-error');
+                        if (errorSpan) {
+                            errorSpan.textContent = message;
+                            errorSpan.style.display = 'block';
+                        }
+                    }
+                });
+            }
+
+            if (!document.querySelector('.payment-option.selected')) {
+                isValid = false;
+                document.querySelector('.payment-methods').insertAdjacentHTML(
+                    'beforeend',
+                    '<span class="validation-error" style="display: block; margin-top: 10px;">Wybierz metodę płatności</span>'
+                );
+            }
+
+            if (!isValid) {
+                const firstError = document.querySelector('.form-group.error, .validation-error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            const orderNumber = generateOrderNumber();
+            const email = document.getElementById('email').value;
+            const maskedEmail = maskEmail(email);
+
+            document.getElementById('orderNumber').textContent = orderNumber;
+            document.getElementById('maskedEmail').textContent = maskedEmail;
+            
+            document.getElementById('validationPopup').style.display = 'none';
+            
+            document.querySelector('.overlay').style.display = 'block';
+            document.querySelector('.order-confirmation').style.display = 'block';
+
+            setTimeout(() => {
+                localStorage.removeItem('selectedProduct');
+            }, 5000);
+        }
+
+        function showValidationErrors(errors) {
+            const list = document.getElementById('validationList');
+            list.innerHTML = '';
+            
+            errors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                list.appendChild(li);
+            });
+
+            document.getElementById('validationPopup').style.display = 'block';
+            document.querySelector('.overlay').style.display = 'block';
+        }
+
+        function closeValidationPopup() {
+            document.getElementById('validationPopup').style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+        }
+
+        document.querySelectorAll('#courierDetails input').forEach(input => {
+            input.addEventListener('input', function() {
+                this.classList.remove('error');
+            });
+        });
+
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const errorMessage = document.querySelector('.payment-methods .validation-error');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+                
+                document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                document.getElementById('paymentMethod').value = option.dataset.method;
+            });
+        });
+
+        document.querySelectorAll('.delivery-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const errorMessage = document.querySelector('.delivery-methods .validation-error');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+                
+                document.querySelectorAll('.delivery-option').forEach(opt => 
+                    opt.classList.remove('selected'));
+                option.classList.add('selected');
+
+                document.querySelectorAll('.delivery-details').forEach(detail => 
+                    detail.classList.remove('active'));
+
+                const method = option.dataset.method;
+                if (method === 'inpost') {
+                    document.getElementById('inpostDetails').classList.add('active');
+                    document.getElementById('courierDetails').classList.remove('active');
+                    if (!inpostMap) {
+                        setTimeout(initInpostMap, 100);
+                    }
+                } else {
+                    document.getElementById('courierDetails').classList.add('active');
+                    document.getElementById('inpostDetails').classList.remove('active');
+                }
+
+                updateTotalPrice();
+            });
+        });
+
+        function selectLocker(point) {
+            selectedPoint = point;
+            document.getElementById('selectedLocker').value = point.name;
+            document.getElementById('locker-details').innerHTML = `
+                <strong>${point.name}</strong><br>
+                ${point.address.line1}<br>
+                ${point.address.line2}
+            `;
+            document.getElementById('selected-locker-info').classList.add('active');
+            
+            const errorMessage = document.querySelector('#inpostDetails .validation-error');
+            if (errorMessage) {
+                errorMessage.style.display = 'none';
+            }
+            
+            document.getElementById('inpost-map').classList.add('disabled');
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            let isValid = true;
+            let errors = [];
+
+            const requiredFields = {
+                'firstname': 'Wprowadź imię',
+                'lastname': 'Wprowadź nazwisko',
+                'email': 'Wprowadź adres email',
+                'phone': 'Wprowadź numer telefonu',
+                'street': 'Wprowadź ulicę',
+                'houseNumber': 'Wprowadź numer domu',
+                'postalCode': 'Wprowadź kod pocztowy',
+                'city': 'Wprowadź miejscowość'
+            };
+
+            Object.entries(requiredFields).forEach(([id, message]) => {
+                const field = document.getElementById(id);
+                if (!field.value.trim()) {
+                    isValid = false;
+                    errors.push(message);
+                }
+            });
+
+            const selectedDelivery = document.querySelector('.delivery-option.selected');
+            if (!selectedDelivery) {
+                isValid = false;
+                errors.push('Wybierz sposób dostawy');
+            } else {
+                if (selectedDelivery.dataset.method === 'inpost') {
+                    if (!document.getElementById('selectedLocker').value) {
+                        isValid = false;
+                        errors.push('Wybierz paczkomat');
+                    }
+                } else {
+                    const courierFields = {
+                        'delivery-street': 'Wprowadź ulicę dostawy',
+                        'delivery-house': 'Wprowadź numer domu dostawy',
+                        'delivery-postal': 'Wprowadź kod pocztowy dostawy',
+                        'delivery-city': 'Wprowadź miejscowość dostawy'
+                    };
+
+                    Object.entries(courierFields).forEach(([id, message]) => {
+                        const field = document.getElementById(id);
+                        if (!field.value.trim()) {
+                            isValid = false;
+                            errors.push(message);
+                        }
+                    });
+                }
+            }
+
+            if (!document.querySelector('.payment-option.selected')) {
+                isValid = false;
+                errors.push('Wybierz metodę płatności');
+            }
+
+            if (!isValid) {
+                alert('Proszę uzupełnić wszystkie wymagane pola:\n\n' + errors.join('\n'));
+                return;
+            }
+
+            const orderNumber = generateOrderNumber();
+            const email = document.getElementById('email').value;
+            const maskedEmail = maskEmail(email);
+
+            document.getElementById('orderNumber').textContent = orderNumber;
+            document.getElementById('maskedEmail').textContent = maskedEmail;
+            
+            document.querySelector('.overlay').style.display = 'block';
+            document.querySelector('.order-confirmation').style.display = 'block';
+
+            setTimeout(() => {
+                localStorage.removeItem('selectedProduct');
+            }, 5000);
+        }
+
+        document.querySelectorAll('#courierDetails input').forEach(input => {
+            input.addEventListener('input', function() {
+                const formGroup = this.closest('.form-group');
+                if (formGroup) {
+                    if (this.value.trim()) {
+                        formGroup.classList.remove('error');
+                        const errorSpan = formGroup.querySelector('.validation-error');
+                        if (errorSpan) {
+                            errorSpan.style.display = 'none';
+                        }
+                    } else {
+                        formGroup.classList.add('error');
+                        const errorSpan = formGroup.querySelector('.validation-error');
+                        if (errorSpan) {
+                            errorSpan.style.display = 'block';
+                        }
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.delivery-option').forEach(option => {
+            option.addEventListener('click', () => {
+                
+                if (option.dataset.method !== 'inpost') {
+                    document.querySelectorAll('#courierDetails .validation-error').forEach(error => {
+                        error.style.display = 'none';
+                    });
+                    document.querySelectorAll('#courierDetails .form-group').forEach(group => {
+                        group.classList.remove('error');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
