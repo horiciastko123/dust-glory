@@ -813,8 +813,8 @@
             .footer-info {
                 flex-direction: column;
                 gap: 15px;
-                text-align: center;
-                padding: 0 15px;
+                text-align: left;
+                padding: 0 20px;
             }
 
             .footer-info div {
@@ -822,7 +822,14 @@
                 display: flex;
                 align-items: center;
                 justify-content: flex-start;
-                padding: 0 20px;
+                margin: 5px 0;
+            }
+
+            .footer-info i {
+                margin-right: 15px;
+                min-width: 20px;
+                display: flex;
+                justify-content: center;
             }
 
             .footer-info a, 
@@ -831,6 +838,7 @@
                 align-items: center;
                 width: auto;
                 text-align: left;
+                margin-left: 0;
             }
 
             footer {
@@ -840,6 +848,7 @@
             }
 
             .legal-info {
+                text-align: center;
                 width: 100%;
                 padding: 10px 15px 0;
             }
@@ -851,12 +860,12 @@
 
         @media (max-width: 480px) {
             .footer-info {
-                padding: 0 10px;
+                padding: 0 15px;
                 font-size: 0.9rem;
             }
 
             .footer-info div {
-                padding: 0 15px;
+                padding: 0;
             }
         }
     </style>
