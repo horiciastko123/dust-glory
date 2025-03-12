@@ -715,6 +715,28 @@
                 cursor: default;
             }
         }
+
+        @media (max-width: 768px) {
+            .footer-info {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                align-items: center;
+            }
+
+            .footer-info div {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .footer-info a, 
+            .footer-info a.map-link {
+                justify-content: center;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
