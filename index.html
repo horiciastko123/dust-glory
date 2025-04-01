@@ -563,17 +563,62 @@
                 grid-template-columns: 1fr;
                 max-width: 100%;
                 padding: 15px;
-                margin-top: -15px;
+                margin-top: 0;
+            }
+
+            .logo-container {
+                min-height: 150px;
+                margin-bottom: 0;
+            }
+
+            @keyframes moveToTop {
+                from {
+                    top: 55%;
+                    transform: translate(-50%, -50%);
+                }
+                to {
+                    top: 10px;
+                    transform: translate(-50%, 0);
+                }
+            }
+
+            @keyframes stayAtTop {
+                to {
+                    position: absolute;
+                    top: 10px;
+                }
+            }
+
+            footer {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .footer-info {
+                flex-direction: column;
+                gap: 15px;
+                padding-bottom: 10px;
+                align-items: flex-start;
+            }
+
+            .footer-info div {
+                width: 100%;
+            }
+
+            .legal-info {
+                padding-top: 0;
             }
         }
 
         @media (max-width: 360px) {
             .main-logo, .name-logo {
-                width: 90%;
+                width: 80%;
             }
 
             .product-tile {
                 padding: 10px;
+                height: auto;
+                min-height: 450px;
             }
 
             .product-title {
@@ -587,6 +632,10 @@
             .buy-button {
                 padding: 8px 20px;
                 font-size: 0.9rem;
+            }
+
+            footer {
+                padding: 8px;
             }
         }
 
@@ -617,7 +666,7 @@
                 <div class="product-info">
                     <h3 class="product-title">Figurka Dragon Ball Super S.H. Figuarts - Son Goku Ultra Instinct</h3>
                     <div>
-                        <p class="product-price">470.00 zł</p>
+                        <p class="product-price">470 zł</p>
                         <a href="produkty.html?id=1"><button class="buy-button">Sprawdź</button></a>
                     </div>
                 </div>
