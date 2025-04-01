@@ -132,15 +132,16 @@
         .footer-toggle {
             display: none;
             position: fixed;
-            bottom: 10px;
-            right: 10px;
+            bottom: calc(100% - 20px);
+            left: 50%;
+            transform: translateX(-50%);
             background: linear-gradient(to right, #e084df, #39a0d4);
             color: white;
             border: none;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 50% 50% 0 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
             z-index: 101;
             cursor: pointer;
             align-items: center;
@@ -150,13 +151,17 @@
         }
 
         .footer-toggle:hover {
-            transform: scale(1.1);
+            transform: translateX(-50%) translateY(-5px);
         }
 
         .footer-hidden {
             transform: translateY(100%);
             opacity: 0;
             pointer-events: none;
+        }
+
+        .footer-toggle.with-footer {
+            bottom: 100%;
         }
 
         .footer-info {
@@ -168,17 +173,17 @@
             border-bottom: 2px solid rgba(224, 132, 223, 0.2);
             padding-bottom: 15px;
             color: #000;
+            text-align: center;
         }
 
         .footer-info div {
             animation: fadeInUp 0.5s ease-out forwards;
             opacity: 0;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .footer-info div:nth-child(1) { animation-delay: 4.4s; }
-        .footer-info div:nth-child(2) { animation-delay: 4.6s; }
-        .footer-info div:nth-child(3) { animation-delay: 4.8s; }
-        .footer-info div:nth-child(4) { animation-delay: 5.0s; }
 
         .footer-info i {
             color: #e084df;
@@ -855,18 +860,29 @@
                 setTimeout(() => {
                     footer.style.transform = 'translateY(0)';
                     footer.style.opacity = '1';
+                    footerToggle.classList.add('with-footer');
                 }, 4500);
             }
             
             footerToggle.addEventListener('click', () => {
                 if (footer.classList.contains('footer-hidden')) {
+                    // Show footer
                     footer.classList.remove('footer-hidden');
                     footer.style.animation = 'showFooter 0.3s forwards';
                     footerToggle.classList.remove('closed');
+                    footerToggle.classList.add('with-footer');
+                    setTimeout(() => {
+                        footerToggle.style.bottom = '100%';
+                    }, 300);
                 } else {
+                    // Hide footer
                     footer.classList.add('footer-hidden');
                     footer.style.animation = 'toggleFooter 0.3s forwards';
                     footerToggle.classList.add('closed');
+                    footerToggle.classList.remove('with-footer');
+                    setTimeout(() => {
+                        footerToggle.style.bottom = 'calc(100% - 20px)';
+                    }, 300);
                 }
             });
         });
