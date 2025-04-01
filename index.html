@@ -29,9 +29,9 @@
             position: relative;
             width: 100%;
             height: auto;
-            min-height: 400px;
+            min-height: 200px;
             overflow: hidden;
-            margin-bottom: 50px;
+            margin-bottom: 10px;
         }
 
         .main-logo {
@@ -100,7 +100,7 @@
                 transform: translate(-50%, -50%);
             }
             to {
-                top: 50px;
+                top: 20px;
                 transform: translate(-50%, 0);
             }
         }
@@ -108,7 +108,7 @@
         @keyframes stayAtTop {
             to {
                 position: absolute;
-                top: 50px;
+                top: 20px;
             }
         }
 
@@ -200,7 +200,7 @@
 
         .products-container {
             max-width: 1200px;
-            margin: -50px auto 20px;
+            margin: -30px auto 20px;
             padding: 20px;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -323,33 +323,7 @@
                 grid-template-columns: 1fr;
                 padding: 10px;
                 gap: 15px;
-                margin-top: 0;
-            }
-
-            .product-tile {
-                height: auto;
-                min-height: 500px;
-                padding: 15px;
-            }
-
-            .product-image {
-                width: 100%;
-                height: 250px;
-            }
-
-            .product-title {
-                font-size: 1rem;
-                height: auto;
-                min-height: 3.6em;
-            }
-
-            .product-price {
-                font-size: 1.3rem;
-            }
-
-            .buy-button {
-                padding: 8px 20px;
-                font-size: 0.9rem;
+                margin-top: -15px;
             }
 
             .main-logo {
@@ -361,24 +335,29 @@
             .name-logo {
                 width: 80%;
                 max-width: 280px;
+                top: 65%;
             }
 
             .logo-container {
-                min-height: 300px;
+                min-height: 180px;
             }
 
-            body {
-                padding-bottom: 280px;
+            @keyframes moveToTop {
+                from {
+                    top: 65%;
+                    transform: translate(-50%, -50%);
+                }
+                to {
+                    top: 15px;
+                    transform: translate(-50%, 0);
+                }
             }
 
-            .footer-info {
-                font-size: 0.85rem;
-                gap: 12px;
-                padding: 10px 0;
-            }
-
-            .legal-info {
-                font-size: 0.75rem;
+            @keyframes stayAtTop {
+                to {
+                    position: absolute;
+                    top: 15px;
+                }
             }
         }
 
@@ -481,7 +460,7 @@
 
         @media (min-width: 2561px) {
             .logo-container {
-                min-height: 600px;
+                min-height: 500px;
             }
 
             .main-logo {
@@ -498,7 +477,7 @@
                 max-width: 2000px;
                 grid-template-columns: repeat(3, 1fr);
                 gap: 50px;
-                margin-top: -100px;
+                margin-top: -50px;
             }
 
             .product-tile {
@@ -584,17 +563,7 @@
                 grid-template-columns: 1fr;
                 max-width: 100%;
                 padding: 15px;
-                margin-top: -30px;
-            }
-
-            .product-tile {
-                margin: 0 auto;
-                max-width: 400px;
-            }
-
-            .footer-info {
-                flex-direction: column;
-                gap: 15px;
+                margin-top: -15px;
             }
         }
 
@@ -623,13 +592,13 @@
 
         @media (aspect-ratio: 21/9) {
             .logo-container {
-                min-height: 500px;
+                min-height: 300px;
             }
         }
 
         @media (max-aspect-ratio: 3/4) {
             .logo-container {
-                min-height: 350px;
+                min-height: 200px;
             }
         }
     </style>
@@ -646,7 +615,7 @@
                 <div class="limited-ribbon">Limitowany</div>
                 <img src="image/product1.jpg" alt="Product 1" class="product-image" oncontextmenu="return false;">
                 <div class="product-info">
-                    <h3 class="product-title">Figurka Dragon Ball Super S.H. Figuarts - Son Goku Mastered Ultra Instinct</h3>
+                    <h3 class="product-title">Figurka Dragon Ball Super S.H. Figuarts - Son Goku Ultra Instinct</h3>
                     <div>
                         <p class="product-price">470 zł</p>
                         <a href="produkty.html?id=1"><button class="buy-button">Sprawdź</button></a>
