@@ -107,6 +107,19 @@
             outline: none;
         }
 
+        .form-group.error input,
+        .form-group.error select {
+            border-color: #ff4444;
+            background-color: rgba(255, 68, 68, 0.05);
+        }
+
+        .form-group.error .validation-error {
+            display: block;
+            color: #ff4444;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
         .submit-button {
             background: linear-gradient(to right, #e084df, #39a0d4);
             color: white;
@@ -796,6 +809,121 @@
                 font-size: 1.1rem;
             }
         }
+
+        .order-summary {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            text-align: left;
+            max-width: 500px;
+            width: 90%;
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        .order-summary h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .summary-product {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-product img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        .summary-product-details h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .summary-product-price {
+            color: #e084df;
+            font-weight: bold;
+        }
+
+        .summary-section {
+            margin-bottom: 20px;
+        }
+
+        .summary-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .summary-row.total {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .summary-total {
+            color: #e084df;
+        }
+
+        .summary-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .back-to-form {
+            background: #f5f5f5;
+            color: #333;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-form:hover {
+            background: #e0e0e0;
+        }
+
+        .confirm-order {
+            background: linear-gradient(to right, #e084df, #39a0d4);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-order:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -996,6 +1124,66 @@
         <h3>Proszę uzupełnić wymagane pola:</h3>
         <ul id="validationList"></ul>
         <button onclick="closeValidationPopup()">Rozumiem</button>
+    </div>
+
+    <div class="order-summary" id="orderSummary">
+        <h2>Podsumowanie zamówienia</h2>
+        <div class="summary-product">
+            <img src="" alt="Product Image" id="summaryProductImage">
+            <div class="summary-product-details">
+                <h3 id="summaryProductName">Nazwa produktu</h3>
+                <p class="summary-product-price" id="summaryProductPrice">0.00 zł</p>
+            </div>
+        </div>
+        <div class="summary-section">
+            <h3>Dane dostawy</h3>
+            <div class="summary-row">
+                <span>Imię:</span>
+                <span id="summaryFirstname"></span>
+            </div>
+            <div class="summary-row">
+                <span>Nazwisko:</span>
+                <span id="summaryLastname"></span>
+            </div>
+            <div class="summary-row">
+                <span>Email:</span>
+                <span id="summaryEmail"></span>
+            </div>
+            <div class="summary-row">
+                <span>Telefon:</span>
+                <span id="summaryPhone"></span>
+            </div>
+            <div class="summary-row">
+                <span>Adres:</span>
+                <span id="summaryAddress"></span>
+            </div>
+        </div>
+        <div class="summary-section">
+            <h3>Metoda dostawy</h3>
+            <div class="summary-row">
+                <span>Sposób:</span>
+                <span id="summaryDeliveryMethod"></span>
+            </div>
+            <div class="summary-row">
+                <span>Koszt:</span>
+                <span id="summaryDeliveryCost"></span>
+            </div>
+        </div>
+        <div class="summary-section">
+            <h3>Metoda płatności</h3>
+            <div class="summary-row">
+                <span>Metoda:</span>
+                <span id="summaryPaymentMethod"></span>
+            </div>
+        </div>
+        <div class="summary-row total">
+            <span>Łączna cena:</span>
+            <span class="summary-total" id="summaryTotalPrice">0.00 zł</span>
+        </div>
+        <div class="summary-buttons">
+            <button class="back-to-form" onclick="backToForm()">Powrót</button>
+            <button class="confirm-order" onclick="confirmOrder()">Potwierdź</button>
+        </div>
     </div>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -1210,6 +1398,7 @@
                 if (!field.value.trim()) {
                     isValid = false;
                     errors.push(message);
+                    field.closest('.form-group').classList.add('error');
                 }
             });
 
@@ -1222,6 +1411,7 @@
                     if (!document.getElementById('selectedLocker').value) {
                         isValid = false;
                         errors.push('Wybierz paczkomat');
+                        document.getElementById('inpost-error').classList.add('active');
                     }
                 } else {
                     const courierFields = {
@@ -1236,6 +1426,7 @@
                         if (!field.value.trim()) {
                             isValid = false;
                             errors.push(message);
+                            field.closest('.form-group').classList.add('error');
                         }
                     });
                 }
@@ -1247,10 +1438,114 @@
             }
 
             if (!isValid) {
-                alert('Proszę uzupełnić wszystkie wymagane pola:\n\n' + errors.join('\n'));
                 return;
             }
 
+            showOrderSummary();
+        }
+
+        function showOrderSummary() {
+            document.querySelector('.payment-container').style.display = 'none';
+            
+            const product = JSON.parse(localStorage.getItem('selectedProduct'));
+            document.getElementById('summaryProductImage').src = product.image;
+            document.getElementById('summaryProductName').textContent = product.name;
+            document.getElementById('summaryProductPrice').textContent = product.price;
+            
+            document.getElementById('summaryFirstname').textContent = document.getElementById('firstname').value;
+            document.getElementById('summaryLastname').textContent = document.getElementById('lastname').value;
+            document.getElementById('summaryEmail').textContent = document.getElementById('email').value;
+            
+            const phonePrefix = document.getElementById('phonePrefix').value;
+            const phone = document.getElementById('phone').value;
+            document.getElementById('summaryPhone').textContent = `${phonePrefix} ${phone}`;
+            
+            const street = document.getElementById('street').value;
+            const houseNumber = document.getElementById('houseNumber').value;
+            const apartmentNumber = document.getElementById('apartmentNumber').value;
+            const postalCode = document.getElementById('postalCode').value;
+            const city = document.getElementById('city').value;
+            const country = document.getElementById('country').options[document.getElementById('country').selectedIndex].text;
+            
+            let address = `${street} ${houseNumber}`;
+            if (apartmentNumber) {
+                address += `/${apartmentNumber}`;
+            }
+            address += `, ${postalCode} ${city}, ${country}`;
+            document.getElementById('summaryAddress').textContent = address;
+            
+            const selectedDelivery = document.querySelector('.delivery-option.selected');
+            let deliveryMethod = '';
+            let deliveryCost = '';
+            
+            if (selectedDelivery) {
+                deliveryMethod = selectedDelivery.querySelector('span:first-of-type').textContent;
+                deliveryCost = selectedDelivery.querySelector('.price').textContent;
+                
+                if (selectedDelivery.dataset.method === 'inpost' && document.getElementById('selectedLocker').value) {
+                    const lockerDetails = document.getElementById('locker-details').textContent.trim();
+                    deliveryMethod += ` (${lockerDetails})`;
+                }
+                
+                document.getElementById('summaryDeliveryMethod').textContent = deliveryMethod;
+                document.getElementById('summaryDeliveryCost').textContent = deliveryCost;
+            }
+            
+            const selectedPayment = document.querySelector('.payment-option.selected');
+            if (selectedPayment) {
+                document.getElementById('summaryPaymentMethod').textContent = 
+                    selectedPayment.querySelector('span').textContent;
+            }
+            
+            const productPrice = parseFloat(product.price.replace(' zł', '').replace(',', '.'));
+            const shippingPrice = parseFloat(deliveryCost.replace(' zł', '').replace(',', '.'));
+            const totalPrice = productPrice + shippingPrice;
+            
+            document.getElementById('summaryTotalPrice').textContent = 
+                totalPrice.toFixed(2).replace('.', ',') + ' zł';
+            
+            document.getElementById('orderSummary').style.display = 'block';
+        }
+        
+        function backToForm() {
+            document.getElementById('orderSummary').style.display = 'none';
+            document.querySelector('.payment-container').style.display = 'block';
+        }
+        
+        function generateOrderNumber() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            const date = new Date();
+            
+            result += date.getFullYear().toString().slice(-2);
+            result += (date.getMonth() + 1).toString().padStart(2, '0');
+            result += date.getDate().toString().padStart(2, '0');
+            result += '-';
+            
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            return result;
+        }
+        
+        function maskEmail(email) {
+            const parts = email.split('@');
+            if (parts.length !== 2) return email;
+            
+            const name = parts[0];
+            const domain = parts[1];
+            
+            const maskedName = name.length <= 4 ? 
+                name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1) :
+                name.substring(0, 2) + '*'.repeat(name.length - 3) + name.charAt(name.length - 1);
+                
+            return maskedName + '@' + domain;
+        }
+        
+        function confirmOrder() {
+            document.getElementById('orderSummary').style.display = 'none';
+            
             const orderNumber = generateOrderNumber();
             const email = document.getElementById('email').value;
             const maskedEmail = maskEmail(email);
@@ -1264,20 +1559,6 @@
             setTimeout(() => {
                 localStorage.removeItem('selectedProduct');
             }, 5000);
-        }
-
-        function generateOrderNumber() {
-            const date = new Date();
-            const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            return `DG${date.getFullYear().toString().slice(-2)}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}-${randomNum}`;
-        }
-
-        function maskEmail(email) {
-            const [username, domain] = email.split('@');
-            const maskedUsername = username.charAt(0) + 
-                '*'.repeat(username.length - 2) + 
-                username.charAt(username.length - 1);
-            return `${maskedUsername}@${domain}`;
         }
 
         document.querySelectorAll('input, select').forEach(input => {
