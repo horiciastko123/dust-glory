@@ -126,6 +126,37 @@
             opacity: 0;
             transform: translateY(100%);
             z-index: 100;
+            left: 0;
+        }
+
+        .footer-toggle {
+            display: none;
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: linear-gradient(to right, #e084df, #39a0d4);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 101;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .footer-hidden {
+            transform: translateY(100%);
+            opacity: 0;
+            pointer-events: none;
         }
 
         .footer-info {
@@ -203,10 +234,28 @@
             margin: -30px auto 20px;
             padding: 20px;
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr;
             gap: 30px;
             position: relative;
             z-index: 1;
+        }
+
+        @keyframes toggleFooter {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100%); opacity: 0; }
+        }
+
+        @keyframes showFooter {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .footer-toggle .fa-chevron-up {
+            transition: transform 0.3s ease;
+        }
+
+        .footer-toggle.closed .fa-chevron-up {
+            transform: rotate(180deg);
         }
 
         .product-tile {
@@ -590,8 +639,12 @@
             }
 
             footer {
-                padding: 10px;
+                padding: 15px 10px;
                 gap: 10px;
+            }
+
+            .footer-toggle {
+                display: flex;
             }
 
             .footer-info {
@@ -599,14 +652,39 @@
                 gap: 15px;
                 padding-bottom: 10px;
                 align-items: flex-start;
+                text-align: left;
+                padding: 0;
+                width: 100%;
             }
 
             .footer-info div {
                 width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                margin: 5px 0;
+            }
+
+            .footer-info i {
+                margin-right: 15px;
+                min-width: 20px;
+                display: flex;
+                justify-content: center;
+            }
+
+            .footer-info a, 
+            .footer-info a.map-link {
+                display: flex;
+                align-items: center;
+                width: auto;
+                text-align: left;
+                margin-left: 0;
             }
 
             .legal-info {
                 padding-top: 0;
+                text-align: center;
+                width: 100%;
             }
         }
 
@@ -754,6 +832,7 @@
             <p>&copy; 2025 Dust and Glory. Wszelkie prawa zastrzeżone.</p>
         </div>
     </footer>
+    <button class="footer-toggle"><i class="fas fa-chevron-up"></i></button>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -764,6 +843,30 @@
                     }, index * 200);
                 });
             }, 3500);
+            
+            const footer = document.querySelector('footer');
+            const footerToggle = document.querySelector('.footer-toggle');
+            
+            if (window.innerWidth <= 767) {
+                footerToggle.style.display = 'flex';
+                
+                setTimeout(() => {
+                    footer.style.transform = 'translateY(0)';
+                    footer.style.opacity = '1';
+                }, 4500);
+            }
+            
+            footerToggle.addEventListener('click', () => {
+                if (footer.classList.contains('footer-hidden')) {
+                    footer.classList.remove('footer-hidden');
+                    footer.style.animation = 'showFooter 0.3s forwards';
+                    footerToggle.classList.remove('closed');
+                } else {
+                    footer.classList.add('footer-hidden');
+                    footer.style.animation = 'toggleFooter 0.3s forwards';
+                    footerToggle.classList.add('closed');
+                }
+            });
         });
 
         const limitedProducts = {
