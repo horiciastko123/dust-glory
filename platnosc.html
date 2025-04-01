@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dust and Glory</title>
+    <title>Płatność - Dust and Glory</title>
     <link rel="icon" type="image/" href="image/Logo2_biale.png">
     <link rel="stylesheet" href="https://geowidget.easypack24.net/css/easypack.css"/>
     <script src="https://geowidget.easypack24.net/js/sdk-for-javascript.js"></script>
@@ -487,6 +487,24 @@
             height: 400px;
             width: 100%;
             margin: 15px 0;
+            display: none; /* Mapa jest domyślnie ukryta */
+        }
+
+        .show-map-button {
+            background: linear-gradient(to right, #e084df, #39a0d4);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 15px 0;
+            transition: transform 0.2s ease;
+            display: block;
+        }
+
+        .show-map-button:hover {
+            transform: scale(1.05);
         }
 
         #selected-locker-info {
@@ -894,6 +912,7 @@
 
                 <div id="inpostDetails" class="delivery-details">
                     <h4>Wybierz Paczkomat</h4>
+                    <button type="button" class="show-map-button" id="showMapButton">Wybierz paczkomat</button>
                     <div id="inpost-map" class="map-widget"></div>
                     <div id="selected-locker-info">
                         <strong>Wybrany paczkomat:</strong>
@@ -994,35 +1013,28 @@
             } else {
                 window.location.href = 'index.html';
             }
+
+            document.getElementById('showMapButton').addEventListener('click', function() {
+                document.getElementById('inpost-map').style.display = 'block';
+                this.style.display = 'none';
+                if (!inpostMap) {
+                    setTimeout(initInpostMap, 100);
+                }
+            });
         });
 
-        const countryData = [
-            { code: 'PL', name: 'Polska', flag: '🇵🇱', prefix: '+48', postalFormat: '[0-9]{2}-[0-9]{3}', postalPlaceholder: '00-000' },
-            { code: 'DE', name: 'Niemcy', flag: '🇩🇪', prefix: '+49', postalFormat: '[0-9]{5}', postalPlaceholder: '12345' },
-            { code: 'GB', name: 'Wielka Brytania', flag: '🇬🇧', prefix: '+44', postalFormat: '[A-Z]{1,2}[0-9][A-Z0-9]? [0-9][A-Z]{2}', postalPlaceholder: 'SW1A 1AA' },
-            { code: 'US', name: 'Stany Zjednoczone', flag: '🇺🇸', prefix: '+1', postalFormat: '[0-9]{5}(-[0-9]{4})?', postalPlaceholder: '12345' },
-            { code: 'FR', name: 'Francja', flag: '🇫🇷', prefix: '+33', postalFormat: '[0-9]{5}', postalPlaceholder: '75001' },
-        ];
+        const countryData = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            const countrySelect = document.getElementById('country');
-            const phonePrefixSelect = document.getElementById('phonePrefix');
-
-            countryData.forEach(country => {
-                countrySelect.innerHTML += `
-                    <option value="${country.code}">
-                        <div class="country-option">
-                            ${country.flag} ${country.name}
-                        </div>
-                    </option>
-                `;
-
-                phonePrefixSelect.innerHTML += `
-                    <option value="${country.prefix}" data-country="${country.code}">
-                        ${country.flag} ${country.prefix}
-                    </option>
-                `;
-            });
+            fetchCountryData()
+                .then(() => {
+                    populateCountrySelects();
+                })
+                .catch(error => {
+                    console.error('Error loading country data:', error);
+                    useStaticCountryData();
+                    populateCountrySelects();
+                });
 
             const form = document.querySelector('.payment-form');
             const inputs = form.querySelectorAll('input, select');
@@ -1032,6 +1044,95 @@
                 input.addEventListener('blur', validateInput);
             });
         });
+
+        function fetchCountryData() {
+            return fetch('https://restcountries.com/v3.1/all?fields=name,flags,idd,cca2')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    data.sort((a, b) => a.name.common.localeCompare(b.name.common));
+                    
+                    data.forEach(country => {
+                        if (country.idd && country.idd.root && country.cca2) {
+                            const prefix = country.idd.root + (country.idd.suffixes && country.idd.suffixes[0] ? country.idd.suffixes[0] : '');
+                            
+                            let postalFormat = '[0-9]{4,10}';
+                            let postalPlaceholder = '12345';
+                            
+                            if (country.cca2 === 'PL') {
+                                postalFormat = '[0-9]{2}-[0-9]{3}';
+                                postalPlaceholder = '00-000';
+                            } else if (country.cca2 === 'GB') {
+                                postalFormat = '[A-Z]{1,2}[0-9][A-Z0-9]? [0-9][A-Z]{2}';
+                                postalPlaceholder = 'SW1A 1AA';
+                            } else if (country.cca2 === 'US') {
+                                postalFormat = '[0-9]{5}(-[0-9]{4})?';
+                                postalPlaceholder = '12345';
+                            } else if (country.cca2 === 'DE') {
+                                postalFormat = '[0-9]{5}';
+                                postalPlaceholder = '12345';
+                            }
+                            
+                            countryData.push({
+                                code: country.cca2,
+                                name: country.name.common,
+                                flag: country.flags.svg || '',
+                                flagEmoji: country.flag || '',
+                                prefix: prefix,
+                                postalFormat: postalFormat,
+                                postalPlaceholder: postalPlaceholder
+                            });
+                        }
+                    });
+                });
+        }
+
+        function useStaticCountryData() {
+            countryData.length = 0;
+
+            countryData.push(
+                { code: 'PL', name: 'Polska', flag: '', flagEmoji: '🇵🇱', prefix: '+48', postalFormat: '[0-9]{2}-[0-9]{3}', postalPlaceholder: '00-000' },
+                { code: 'DE', name: 'Niemcy', flag: '', flagEmoji: '🇩🇪', prefix: '+49', postalFormat: '[0-9]{5}', postalPlaceholder: '12345' },
+                { code: 'GB', name: 'Wielka Brytania', flag: '', flagEmoji: '🇬🇧', prefix: '+44', postalFormat: '[A-Z]{1,2}[0-9][A-Z0-9]? [0-9][A-Z]{2}', postalPlaceholder: 'SW1A 1AA' },
+                { code: 'US', name: 'Stany Zjednoczone', flag: '', flagEmoji: '🇺🇸', prefix: '+1', postalFormat: '[0-9]{5}(-[0-9]{4})?', postalPlaceholder: '12345' },
+                { code: 'FR', name: 'Francja', flag: '', flagEmoji: '🇫🇷', prefix: '+33', postalFormat: '[0-9]{5}', postalPlaceholder: '75001' }
+            );
+        }
+
+        function populateCountrySelects() {
+            const countrySelect = document.getElementById('country');
+            const phonePrefixSelect = document.getElementById('phonePrefix');
+            
+            countrySelect.innerHTML = '<option value="">Wybierz kraj</option>';
+            phonePrefixSelect.innerHTML = '';
+            
+            countryData.forEach(country => {
+                countrySelect.innerHTML += `
+                    <option value="${country.code}">
+                        ${country.flagEmoji} ${country.code} - ${country.name}
+                    </option>
+                `;
+
+                phonePrefixSelect.innerHTML += `
+                    <option value="${country.prefix}" data-country="${country.code}">
+                        ${country.flagEmoji} ${country.prefix} (${country.code})
+                    </option>
+                `;
+            });
+            
+            const plOption = countrySelect.querySelector('option[value="PL"]');
+            if (plOption) {
+                plOption.selected = true;
+                const plPhoneOption = phonePrefixSelect.querySelector('option[data-country="PL"]');
+                if (plPhoneOption) {
+                    plPhoneOption.selected = true;
+                }
+            }
+        }
 
         function validateInput(event) {
             const input = event.target;
@@ -1225,7 +1326,14 @@
                 if (method === 'inpost') {
                     document.getElementById('inpostDetails').classList.add('active');
                     document.getElementById('courierDetails').classList.remove('active');
-                    initInpostMap();
+                    
+                    document.getElementById('showMapButton').style.display = 'block';
+                    document.getElementById('inpost-map').style.display = 'none';
+                    
+                    if (document.getElementById('selectedLocker').value) {
+                        document.getElementById('selected-locker-info').classList.add('active');
+                        document.getElementById('showMapButton').style.display = 'none';
+                    }
                 } else {
                     document.getElementById('courierDetails').classList.add('active');
                     document.getElementById('inpostDetails').classList.remove('active');
@@ -1234,49 +1342,6 @@
                 updateTotalPrice();
             });
         });
-
-        function initInpostMap() {
-            if (!window.easyPackAsyncInit) {
-                window.easyPackAsyncInit = function() {
-                    easyPack.init({
-                        defaultLocale: 'pl',
-                        points: {
-                            types: ['parcel_locker']
-                        },
-                        map: {
-                            initialTypes: ['parcel_locker'],
-                            useGeolocation: true
-                        }
-                    });
-
-                    const map = easyPack.mapWidget('inpost-map', function(point) {
-                        document.getElementById('selectedLocker').value = point.name;
-                        document.getElementById('locker-details').innerHTML = `
-                            ${point.name}<br>
-                            ${point.address.line1}<br>
-                            ${point.address.line2}
-                        `;
-                        document.getElementById('selected-locker-info').classList.add('active');
-                    });
-                };
-            }
-        }
-
-        function updateTotalPrice() {
-            const productPrice = parseFloat(document.getElementById('productPrice')
-                .textContent.replace(' zł', '').replace(',', '.'));
-            const selectedDelivery = document.querySelector('.delivery-option.selected');
-            const deliveryPrice = selectedDelivery ? 
-                parseFloat(selectedDelivery.querySelector('.price').textContent
-                    .replace(' zł', '').replace(',', '.')) : 0;
-
-            const total = productPrice + deliveryPrice;
-            document.querySelector('.total-price').textContent = 
-                total.toFixed(2).replace('.', ',') + ' zł';
-        }
-
-        let inpostMap = null;
-        let selectedPoint = null;
 
         function initInpostMap() {
             if (window.easyPack && !inpostMap) {
@@ -1307,15 +1372,32 @@
             `;
             document.getElementById('selected-locker-info').classList.add('active');
             document.getElementById('inpost-error').classList.remove('active');
-            document.getElementById('inpost-map').classList.add('disabled');
+            document.getElementById('inpost-map').style.display = 'none';
+            document.getElementById('showMapButton').style.display = 'none';
         }
 
         function changeLocker() {
-            document.getElementById('inpost-map').classList.remove('disabled');
+            document.getElementById('inpost-map').style.display = 'block';
             document.getElementById('selected-locker-info').classList.remove('active');
             selectedPoint = null;
             document.getElementById('selectedLocker').value = '';
         }
+
+        function updateTotalPrice() {
+            const productPrice = parseFloat(document.getElementById('productPrice')
+                .textContent.replace(' zł', '').replace(',', '.'));
+            const selectedDelivery = document.querySelector('.delivery-option.selected');
+            const deliveryPrice = selectedDelivery ? 
+                parseFloat(selectedDelivery.querySelector('.price').textContent
+                    .replace(' zł', '').replace(',', '.')) : 0;
+
+            const total = productPrice + deliveryPrice;
+            document.querySelector('.total-price').textContent = 
+                total.toFixed(2).replace('.', ',') + ' zł';
+        }
+
+        let inpostMap = null;
+        let selectedPoint = null;
 
         document.querySelectorAll('.delivery-option').forEach(option => {
             option.addEventListener('click', () => {
@@ -1338,173 +1420,13 @@
                 if (method === 'inpost') {
                     document.getElementById('inpostDetails').classList.add('active');
                     document.getElementById('courierDetails').classList.remove('active');
-                    if (!inpostMap) {
-                        setTimeout(initInpostMap, 100);
-                    }
-                } else {
-                    document.getElementById('courierDetails').classList.add('active');
-                    document.getElementById('inpostDetails').classList.remove('active');
-                }
-
-                updateTotalPrice();
-            });
-        });
-
-        function handleSubmit(event) {
-            event.preventDefault();
-            
-            let isValid = true;
-            const requiredFields = {
-                'firstname': 'Pole wymagane',
-                'lastname': 'Pole wymagane',
-                'email': 'Wprowadź poprawny adres email',
-                'phone': 'Wprowadź numer telefonu',
-                'street': 'Wprowadź ulicę',
-                'houseNumber': 'Wprowadź numer domu',
-                'postalCode': 'Wprowadź kod pocztowy',
-                'city': 'Wprowadź miejscowość'
-            };
-
-            document.querySelectorAll('.form-group').forEach(group => {
-                group.classList.remove('error');
-            });
-
-            Object.entries(requiredFields).forEach(([id, message]) => {
-                const field = document.getElementById(id);
-                const formGroup = field.closest('.form-group');
-                
-                if (!field.value.trim()) {
-                    isValid = false;
-                    formGroup.classList.add('error');
-                    const errorSpan = formGroup.querySelector('.validation-error');
-                    if (errorSpan) {
-                        errorSpan.textContent = message;
-                    }
-                }
-            });
-
-            const selectedDelivery = document.querySelector('.delivery-option.selected');
-            if (!selectedDelivery) {
-                isValid = false;
-                document.querySelector('.delivery-methods').insertAdjacentHTML(
-                    'beforeend',
-                    '<span class="validation-error" style="display: block; margin-top: 10px;">Wybierz sposób dostawy</span>'
-                );
-            } else if (selectedDelivery.dataset.method !== 'inpost') {
-                const courierFields = {
-                    'delivery-street': 'Wprowadź ulicę dostawy',
-                    'delivery-house': 'Wprowadź numer domu dostawy',
-                    'delivery-postal': 'Wprowadź kod pocztowy dostawy',
-                    'delivery-city': 'Wprowadź miejscowość dostawy'
-                };
-
-                Object.entries(courierFields).forEach(([id, message]) => {
-                    const field = document.getElementById(id);
-                    const formGroup = field.closest('.form-group');
                     
-                    if (!field.value.trim()) {
-                        isValid = false;
-                        formGroup.classList.add('error');
-                        const errorSpan = formGroup.querySelector('.validation-error');
-                        if (errorSpan) {
-                            errorSpan.textContent = message;
-                            errorSpan.style.display = 'block';
-                        }
-                    }
-                });
-            }
-
-            if (!document.querySelector('.payment-option.selected')) {
-                isValid = false;
-                document.querySelector('.payment-methods').insertAdjacentHTML(
-                    'beforeend',
-                    '<span class="validation-error" style="display: block; margin-top: 10px;">Wybierz metodę płatności</span>'
-                );
-            }
-
-            if (!isValid) {
-                const firstError = document.querySelector('.form-group.error, .validation-error');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                return;
-            }
-
-            const orderNumber = generateOrderNumber();
-            const email = document.getElementById('email').value;
-            const maskedEmail = maskEmail(email);
-
-            document.getElementById('orderNumber').textContent = orderNumber;
-            document.getElementById('maskedEmail').textContent = maskedEmail;
-            
-            document.getElementById('validationPopup').style.display = 'none';
-            
-            document.querySelector('.overlay').style.display = 'block';
-            document.querySelector('.order-confirmation').style.display = 'block';
-
-            setTimeout(() => {
-                localStorage.removeItem('selectedProduct');
-            }, 5000);
-        }
-
-        function showValidationErrors(errors) {
-            const list = document.getElementById('validationList');
-            list.innerHTML = '';
-            
-            errors.forEach(error => {
-                const li = document.createElement('li');
-                li.textContent = error;
-                list.appendChild(li);
-            });
-
-            document.getElementById('validationPopup').style.display = 'block';
-            document.querySelector('.overlay').style.display = 'block';
-        }
-
-        function closeValidationPopup() {
-            document.getElementById('validationPopup').style.display = 'none';
-            document.querySelector('.overlay').style.display = 'none';
-        }
-
-        document.querySelectorAll('#courierDetails input').forEach(input => {
-            input.addEventListener('input', function() {
-                this.classList.remove('error');
-            });
-        });
-
-        document.querySelectorAll('.payment-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const errorMessage = document.querySelector('.payment-methods .validation-error');
-                if (errorMessage) {
-                    errorMessage.remove();
-                }
-                
-                document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                document.getElementById('paymentMethod').value = option.dataset.method;
-            });
-        });
-
-        document.querySelectorAll('.delivery-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const errorMessage = document.querySelector('.delivery-methods .validation-error');
-                if (errorMessage) {
-                    errorMessage.remove();
-                }
-                
-                document.querySelectorAll('.delivery-option').forEach(opt => 
-                    opt.classList.remove('selected'));
-                option.classList.add('selected');
-
-                document.querySelectorAll('.delivery-details').forEach(detail => 
-                    detail.classList.remove('active'));
-
-                const method = option.dataset.method;
-                if (method === 'inpost') {
-                    document.getElementById('inpostDetails').classList.add('active');
-                    document.getElementById('courierDetails').classList.remove('active');
-                    if (!inpostMap) {
-                        setTimeout(initInpostMap, 100);
+                    document.getElementById('showMapButton').style.display = 'block';
+                    document.getElementById('inpost-map').style.display = 'none';
+                    
+                    if (document.getElementById('selectedLocker').value) {
+                        document.getElementById('selected-locker-info').classList.add('active');
+                        document.getElementById('showMapButton').style.display = 'none';
                     }
                 } else {
                     document.getElementById('courierDetails').classList.add('active');
@@ -1514,102 +1436,6 @@
                 updateTotalPrice();
             });
         });
-
-        function selectLocker(point) {
-            selectedPoint = point;
-            document.getElementById('selectedLocker').value = point.name;
-            document.getElementById('locker-details').innerHTML = `
-                <strong>${point.name}</strong><br>
-                ${point.address.line1}<br>
-                ${point.address.line2}
-            `;
-            document.getElementById('selected-locker-info').classList.add('active');
-            
-            const errorMessage = document.querySelector('#inpostDetails .validation-error');
-            if (errorMessage) {
-                errorMessage.style.display = 'none';
-            }
-            
-            document.getElementById('inpost-map').classList.add('disabled');
-        }
-
-        function handleSubmit(event) {
-            event.preventDefault();
-            
-            let isValid = true;
-            let errors = [];
-
-            const requiredFields = {
-                'firstname': 'Wprowadź imię',
-                'lastname': 'Wprowadź nazwisko',
-                'email': 'Wprowadź adres email',
-                'phone': 'Wprowadź numer telefonu',
-                'street': 'Wprowadź ulicę',
-                'houseNumber': 'Wprowadź numer domu',
-                'postalCode': 'Wprowadź kod pocztowy',
-                'city': 'Wprowadź miejscowość'
-            };
-
-            Object.entries(requiredFields).forEach(([id, message]) => {
-                const field = document.getElementById(id);
-                if (!field.value.trim()) {
-                    isValid = false;
-                    errors.push(message);
-                }
-            });
-
-            const selectedDelivery = document.querySelector('.delivery-option.selected');
-            if (!selectedDelivery) {
-                isValid = false;
-                errors.push('Wybierz sposób dostawy');
-            } else {
-                if (selectedDelivery.dataset.method === 'inpost') {
-                    if (!document.getElementById('selectedLocker').value) {
-                        isValid = false;
-                        errors.push('Wybierz paczkomat');
-                    }
-                } else {
-                    const courierFields = {
-                        'delivery-street': 'Wprowadź ulicę dostawy',
-                        'delivery-house': 'Wprowadź numer domu dostawy',
-                        'delivery-postal': 'Wprowadź kod pocztowy dostawy',
-                        'delivery-city': 'Wprowadź miejscowość dostawy'
-                    };
-
-                    Object.entries(courierFields).forEach(([id, message]) => {
-                        const field = document.getElementById(id);
-                        if (!field.value.trim()) {
-                            isValid = false;
-                            errors.push(message);
-                        }
-                    });
-                }
-            }
-
-            if (!document.querySelector('.payment-option.selected')) {
-                isValid = false;
-                errors.push('Wybierz metodę płatności');
-            }
-
-            if (!isValid) {
-                alert('Proszę uzupełnić wszystkie wymagane pola:\n\n' + errors.join('\n'));
-                return;
-            }
-
-            const orderNumber = generateOrderNumber();
-            const email = document.getElementById('email').value;
-            const maskedEmail = maskEmail(email);
-
-            document.getElementById('orderNumber').textContent = orderNumber;
-            document.getElementById('maskedEmail').textContent = maskedEmail;
-            
-            document.querySelector('.overlay').style.display = 'block';
-            document.querySelector('.order-confirmation').style.display = 'block';
-
-            setTimeout(() => {
-                localStorage.removeItem('selectedProduct');
-            }, 5000);
-        }
 
         document.querySelectorAll('#courierDetails input').forEach(input => {
             input.addEventListener('input', function() {
